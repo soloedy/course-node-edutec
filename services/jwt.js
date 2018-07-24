@@ -2,7 +2,7 @@
 
 
 var jwt = require('jwt-simple');
-// Se utiliza para experirar los token. 
+// Se utiliza para expirar los token. 
 var moment = require('moment');
 // Funciona para desencriptar los tokens.
 var secret = 'desencriptar-el-token';
@@ -17,7 +17,7 @@ exports.createToken = function(user){
         role: user.role,
         image: user.image,
         iat: moment().unix(),
-        exp: moment().add(30, 'days').unix
+        exp: moment().add(5, 'days').unix()
     };
 
     return jwt.encode(payload, secret);
