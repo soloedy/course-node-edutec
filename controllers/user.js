@@ -70,8 +70,7 @@ function register(req, res){
 }
 
 function login(req, res){
-    var params = req.body;
-    
+    var params = req.body;   
     var email = params.email;
     var password = params.password;
 
@@ -106,13 +105,13 @@ function login(req, res){
             }
         }
     });
-
 }
 
 function updateUser(req, res){
     var userID = req.params.id;
     var updateData = req.body;
 
+    // Datos que no quiero modificar.
     delete updateData.password;
      
     if(userID != req.user.sub){
@@ -139,9 +138,104 @@ function updateUser(req, res){
     });
 }
 
+function deleteUser(req, res){
+    var userID = req.params.id;
+
+    User.findByIdAndRemove(userID, (err, userRemoved) => {
+        if(err){
+            res.status(500).send({
+                message: 'Error en la petición.'
+            });
+        }else{
+            if(!userRemoved){
+                res.status(404).send({
+                    message: 'No se ha borrado el usuario.'
+                });
+            }else{
+                res.status(400).send({
+                    message: `El usuario ${userRemoved.email} se ha eliminado exitosamente`
+                });
+            }
+        }
+    });
+}
+function updateRole(req, res){
+    var userID = req.params.id;
+    var roleUser = 'ROLE_ADMIN';
+
+    User.findByIdAndUpdate(userID, {role: roleUser}, {new: true}, (err, userUpdated) => {
+        if (err){
+            res.status(500).send({
+                message: 'Error al actualizar el usuario.'
+            });
+        }else{
+            if(!userUpdated){
+                res.status(404).send({
+                    message: 'No se ha podido actualizar el usuario.'
+                });
+            }else{
+                res.status(200).send({
+                    user: userUpdated
+                });
+            }
+        }
+    });
+}
+function forgotPassword(req, res){
+    var updateData = req.body;
+
+    if(updateData.email && updateData.password){   
+        var userEmail = udateData.email.toLowerCase();
+        var password = udateData.password;
+
+        User.findOne({password: updateData.password}, (err, issetUser) => {
+            if(err){
+                res.status(500).send({
+                    message: 'Error en el servidor'
+                });
+            }else{
+                if(issetUser){
+                    bcrypt.hash(password, null, null, (err, hash) => {
+                        var newPassword = hash;
+
+                        user.findByIdAndUpdate(issetUser.id, {password: newPassword}, {new: true}, (err, userUpdated) => {
+                            if(err){
+                                res.status(500).send({
+                                    message: 'Error al guardar el usario'
+                                });
+                            }else{
+                                if(!userUpdated){
+                                    res.status(404).send({
+                                        message: 'No se ha registrado el usuario'
+                                    });
+                                }else{
+                                    res.status(200).send({
+                                        user: userUpdated
+                                    });
+                                }
+                            }
+                        });
+                    });
+                }else{
+                    res.status(200).send({
+                        message: 'El usuario no se pudo actualizar.'
+                    })
+                }
+            }
+        });
+    }else{
+        res.status(200).send({
+            message: 'Parametros erroneos'
+        });
+    }
+}
+
 module.exports = {
     prueba,
     register,
     login,
-    updateUser
+    updateUser,
+    deleteUser,
+    updateRole,
+    forgotPassword
 }
