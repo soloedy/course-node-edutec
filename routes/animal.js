@@ -13,7 +13,6 @@ var api = express.Router(); // Router nos va a decir todas nuestras rutas.
 api.get('/animals', md_auth.ensureAuth, AnimalController.getAnimals);
 api.get('/animal/:id', md_auth.ensureAuth, AnimalController.getAnimal);
 api.post('/animal', [md_auth.ensureAuth,md_admin.isAdmin], AnimalController.saveAnimal);
-api.post('/animals');
 api.put('/animal/:id', [md_auth.ensureAuth,md_admin.isAdmin], AnimalController.updateAnimal);
 api.delete('/animal/:id', [md_auth.ensureAuth,md_admin.isAdmin], AnimalController.deleteAnimal);
 api.post('/animal-upload-image/:id',[md_upload, md_auth.ensureAuth], AnimalController.uploadImage);
