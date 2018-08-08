@@ -1,46 +1,46 @@
 'use strict'
 
-// Modulos.
+// modulos
 var fs = require('fs');
 var path = require('path');
-
-var Animal = require('../models/animal');
 var constants = require('../utils/constants').constants;
 
-function getAnimals(req, res){
+var Animal = require('../models/animal');
+
+function getAnimals(req, res) {
     Animal.find({}).exec((err, animals) => {
-        if(err){
+        if (err) {
             res.status(500).send({
-                message: constants.Error_In_Request
+                message: constants.ERROR_IN_REQUEST
             });
-        }else{
-            if(!animals){
+        } else {
+            if (!animals) {
                 res.status(404).send({
-                    message: constants.Animal_Not_Exists
+                    message: constants.EMPTY_ANIMALS
                 });
-            }else{
+            } else {
                 res.status(200).send({
                     animals
                 });
             }
-        } 
+        }
     });
 }
 
-function getAnimal(req, res){
+function getAnimal(req, res) {
     var animalId = req.params.id;
 
     Animal.findById(animalId).exec((err, animal) => {
-        if(err){
+        if (err) {
             res.status(500).send({
-                message: constants.Error_In_Request
+                message: constants.ERROR_IN_REQUEST
             });
-        }else{
-            if(!animal){
+        } else {
+            if (!animal) {
                 res.status(404).send({
-                    message: constants.Animal_Not_Exists
+                    message: constants.ANIMAL_NOT_EXISTS
                 });
-            }else{
+            } else {
                 res.status(200).send({
                     animal
                 });
@@ -49,57 +49,56 @@ function getAnimal(req, res){
     });
 }
 
-function saveAnimal(req, res){
+function saveAnimal(req, res) {
     var animal = new Animal();
     var params = req.body;
 
-    // Validar que parametros no estén en blanco.
-    if(params.name){
+    if (params.name) {
         animal.name = params.name;
         animal.description = params.description;
         animal.origen.country = params.country;
         animal.origen.state = params.state;
         animal.image = null;
 
-        // Función de guardado.
         animal.save((err, animalStored) => {
-            if(err){
+            if (err) {
                 res.status(500).send({
-                    message: constants.Error_In_Request
+                    message: constants.ERROR_IN_REQUEST
                 });
-            }else{
-                if(!animalStored){
+            } else {
+                if (!animalStored) {
                     res.status(404).send({
-                        message: constants.Animal_Not_Saved
+                        message: constants.ANIMAL_NOT_SAVED
                     });
-                }else{
+                } else {
                     res.status(200).send({
                         animal: animalStored
                     });
                 }
             }
         });
-    }else{
+    } else {
         res.status(200).send({
-            message: 'El nombre del animal es obligatorio.'
+            message: constants.ANIMAL_NAME_IS_REQUIRED
         });
     }
 }
-function updateAnimal(req, res){
+
+function updateAnimal(req, res) {
     var animalId = req.params.id;
     var update = req.body;
 
     Animal.findByIdAndUpdate(animalId, update, {new: true}, (err, animalUpdated) => {
-        if(err){
+        if (err) {
             res.status(500).send({
-                message: constants.Error_In_Request
+                message: constants.ERROR_IN_REQUEST
             });
-        }else{
-            if(!animalUpdated){
+        } else {
+            if (!animalUpdated) {
                 res.status(404).send({
-                    message: 'No se ha actualizado el animal'
+                    message: constants.ANIMAL_NOT_UPDATED
                 });
-            }else{
+            } else {
                 res.status(200).send({
                     animal: animalUpdated
                 });
@@ -107,24 +106,25 @@ function updateAnimal(req, res){
         }
     });
 }
-function deleteAnimal(req, res){
+
+function deleteAnimal(req, res) {
     var animalId = req.params.id;
 
     Animal.findByIdAndRemove(animalId, (err, animalRemoved) => {
-        if(err){
+        if (err) {
             res.status(500).send({
-                message: constants.Error_In_Request
+                message: constants.ERROR_IN_REQUEST
             });
-        }else{
-            if(!animalRemoved){
+        } else {
+            if (!animalRemoved) {
                 res.status(404).send({
-                    message: constants.Animal_Not_Found
-                }); 
-            }else{
+                    message: constants.ANIMAL_NOT_FOUND
+                });
+            } else {
                 res.status(200).send({
                     animal: animalRemoved
                 });
-            }    
+            }
         }
     });
 }
@@ -146,12 +146,12 @@ function uploadImage(req, res) {
             Animal.findByIdAndUpdate(animalId, {image: file_name}, {new: true}, (err, animalUpdated) => {
                 if (err) {
                     res.status(500).send({
-                        message: constants.Animal_Error_Updated
+                        message: constants.ERROR_IN_REQUEST
                     });
                 } else {
                     if (!animalUpdated) {
                         res.status(404).send({
-                            message: constants.Animal_Not_Updated
+                            message: constants.ANIMAL_NOT_UPDATED
                         });
                     } else {
                         res.status(200).send({
@@ -165,26 +165,26 @@ function uploadImage(req, res) {
             fs.unlink(file_path, (err) => {
                 if (err) {
                     res.status(200).send({
-                        message: 'Extension del archivo no valida y no encontrada'
+                        message: constants.IMAGE_EXTENSION_NOT_VALID
                     });
                 } else {
                     res.status(200).send({
-                        message: 'Extension del archivo no valida'
+                        message: constants.IMAGE_EXTENSION_NOT_VALID
                     });
                 }
             });
         }
     } else {
         res.status(200).send({
-            message: 'No se ha subido ningun archivo'
+            message: constants.REQUIRED_FILE
         });
     }
 }
 
 module.exports = {
     getAnimals,
-    getAnimal,
     saveAnimal,
+    getAnimal,
     updateAnimal,
     deleteAnimal,
     uploadImage
